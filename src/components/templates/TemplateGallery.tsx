@@ -340,6 +340,7 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   const [exportingTemplate, setExportingTemplate] = useState<TemplateConfig | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
+  const [secondaryPhotoIdx, setSecondaryPhotoIdx] = useState<number>(1);
   const [exporting, setExporting] = useState(false);
   const [exportTemplateProps, setExportTemplateProps] = useState<TemplateProps | null>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -348,6 +349,20 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   const photos = property.fotos?.length ? property.fotos : property.fotosSmall || [];
   const thumbs = property.fotosSmall?.length === photos.length ? property.fotosSmall : photos;
   const currentPhoto = photos[selectedPhotoIdx] || photos[0] || "";
+  const currentSecondaryPhoto =
+    photos.length > 1 && secondaryPhotoIdx !== selectedPhotoIdx
+      ? photos[secondaryPhotoIdx] || ""
+      : "";
+
+  // Negotiation hint: which Rizzo template to recommend
+  const hasVenda = (property.valorVenda ?? 0) > 0;
+  const hasLocacao = (property.valorLocacao ?? 0) > 0;
+  const recommendedRizzoId =
+    hasVenda && !hasLocacao
+      ? "sr-venda"
+      : hasLocacao && !hasVenda
+      ? "sr-locacao"
+      : null; // both or neither — recommend none, show both
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -363,7 +378,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
 
   useEffect(() => {
     if (selectedPhotoIdx >= photos.length) setSelectedPhotoIdx(0);
-  }, [photos.length, selectedPhotoIdx]);
+    if (secondaryPhotoIdx >= photos.length) setSecondaryPhotoIdx(photos.length > 1 ? 1 : 0);
+    if (secondaryPhotoIdx === selectedPhotoIdx && photos.length > 1) {
+      setSecondaryPhotoIdx((selectedPhotoIdx + 1) % photos.length);
+    }
+  }, [photos.length, selectedPhotoIdx, secondaryPhotoIdx]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
