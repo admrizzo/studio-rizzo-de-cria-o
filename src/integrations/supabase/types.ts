@@ -178,6 +178,36 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          foto_url: string | null
+          id: string
+          nome: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          foto_url?: string | null
+          id: string
+          nome?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
