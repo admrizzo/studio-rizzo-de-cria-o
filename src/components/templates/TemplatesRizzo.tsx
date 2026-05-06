@@ -5,7 +5,7 @@ import { AreaIcon, QuartosIcon, SuitesIcon, VagasIcon } from "./PropertyIcons";
 /**
  * Templates oficiais Rizzo Imobiliária.
  * Story 1080x1920.
- * Design fiel ao PNG do marketing.
+ * Design refinado para fidelidade total ao PNG do marketing.
  */
 
 const OFFICIAL_COLORS = {
@@ -18,7 +18,7 @@ const OFFICIAL_COLORS = {
 };
 
 const PIN_ICON_RIZZO = (
-  <svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+  <svg width={32} height={32} viewBox="0 0 24 24" fill="none">
     <path
       d="M12 21s-7-4.5-7-10a7 7 0 1 1 14 0c0 5.5-7 10-7 10z"
       stroke="currentColor"
@@ -29,9 +29,10 @@ const PIN_ICON_RIZZO = (
   </svg>
 );
 
-const formatPriceOrConsult = (price: number) => {
+const formatPriceRefined = (price: number) => {
   if (!price || price <= 0) return "Sob consulta";
-  return formatPrice(price);
+  // Remove .00 if present
+  return formatPrice(price).replace(",00", "");
 };
 
 const NoPhotoState: React.FC<{ accent: string }> = ({ accent }) => (
@@ -80,7 +81,7 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
   const price = isVenda
     ? property.valorVenda || property.preco
     : property.valorLocacao || property.preco;
-  const priceText = formatPriceOrConsult(price || 0);
+  const priceText = formatPriceRefined(price || 0);
 
   const photo1 = photoUrl;
   const photo2 = secondaryPhotoUrl || photoUrl;
@@ -89,7 +90,7 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
     return <NoPhotoState accent={accent} />;
   }
 
-  // Stats for the stats bar
+  // Stats for the stats bar - fixed order: área, quartos, suítes, vagas
   const statsList = [
     { icon: AreaIcon, value: property.area, label: "m²", show: property.area > 0 },
     { icon: QuartosIcon, value: property.quartos, label: "quartos", show: property.quartos > 0 },
@@ -101,38 +102,52 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
     <div
       style={{
         position: "relative",
-        width: "100%",
-        height: "100%",
+        width: 1080,
+        height: 1920,
         background: "#000",
         fontFamily: "'Barlow', sans-serif",
         overflow: "hidden",
       }}
     >
-      {/* ── PHOTOS (50/50 split) ─────────────────────────────── */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "50%" }}>
-        <img
-          src={photo1}
-          alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-      </div>
-      <div style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "50%" }}>
-        <img
-          src={photo2}
-          alt=""
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
+      {/* ── PHOTOS (50/50 visual split) ─────────────────────────────── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: 1740, // Area before white footer
+          display: "flex",
+          flexDirection: "column",
+          gap: 4, // Subtle elegant gap
+          background: "#000",
+        }}
+      >
+        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+          <img
+            src={photo1}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+        </div>
+        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+          <img
+            src={photo2}
+            alt=""
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
+        </div>
       </div>
 
       {/* ── OVERLAYS ─────────────────────────────────────────── */}
 
-      {/* 1. Header Bar: Destinação + Endereço (Top of first photo) */}
+      {/* 1. Header Bar: Destinação + Endereço (Higher up, refined) */}
       <div
         style={{
           position: "absolute",
-          top: 140,
-          left: 40,
-          right: 40,
+          top: 100,
+          left: 50,
+          right: 50,
           display: "flex",
           flexDirection: "column",
           gap: 12,
@@ -143,12 +158,12 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
           style={{
             background: accent,
             color: isVenda ? "#fff" : "#000",
-            padding: "16px 36px",
+            padding: "12px 32px",
             borderRadius: 999,
-            fontSize: 34,
+            fontSize: 28,
             fontWeight: 900,
             letterSpacing: "0.08em",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+            boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
           }}
         >
           {destinacaoLabel}
@@ -158,18 +173,19 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
           style={{
             background: "rgba(0,0,0,0.65)",
             color: "#fff",
-            padding: "14px 30px",
+            padding: "12px 28px",
             borderRadius: 999,
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: 700,
             letterSpacing: "0.04em",
             textTransform: "uppercase",
             display: "flex",
             alignItems: "center",
             gap: 12,
-            border: `2px solid ${accent}`,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+            border: `1.5px solid ${accent}`,
+            boxShadow: "0 6px 15px rgba(0,0,0,0.2)",
             maxWidth: "100%",
+            backdropFilter: "blur(4px)",
           }}
         >
           <span style={{ color: accent, display: "flex" }}>{PIN_ICON_RIZZO}</span>
@@ -179,11 +195,11 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
         </div>
       </div>
 
-      {/* 2. Price Pill (Above stats bar, over second photo) */}
+      {/* 2. Price Pill (Lower profile, centered over second photo) */}
       <div
         style={{
           position: "absolute",
-          bottom: 340,
+          top: 1350, // Positioned over second photo
           left: 0,
           right: 0,
           display: "flex",
@@ -194,49 +210,49 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
           style={{
             background: accent,
             color: isVenda ? "#fff" : "#000",
-            padding: "20px 60px",
+            padding: "16px 50px",
             borderRadius: 999,
-            fontSize: 58,
+            fontSize: 52,
             fontWeight: 900,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+            boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
           }}
         >
           {priceText}
         </div>
       </div>
 
-      {/* 3. Stats Bar (Bottom of second photo) */}
+      {/* 3. Stats Bar (Lifted slightly, refined background) */}
       <div
         style={{
           position: "absolute",
-          bottom: 200,
-          left: 40,
-          right: 40,
-          height: 110,
-          background: "rgba(0,0,0,0.7)",
+          top: 1530,
+          left: 50,
+          right: 50,
+          height: 120,
+          background: "rgba(0,0,0,0.6)",
           borderRadius: 24,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-around",
           padding: "0 20px",
-          border: "1px solid rgba(255,255,255,0.15)",
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
         }}
       >
         {statsList.map((stat, i) => (
           <React.Fragment key={i}>
             {i > 0 && (
-              <div style={{ width: 2, height: 40, background: "rgba(255,255,255,0.2)" }} />
+              <div style={{ width: 1.5, height: 44, background: "rgba(255,255,255,0.15)" }} />
             )}
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <stat.icon size={38} color={accent} />
-              <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <stat.icon size={40} color={accent} />
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
                 <span
                   style={{
                     color: "#fff",
-                    fontSize: 32,
-                    fontWeight: 800,
+                    fontSize: 34,
+                    fontWeight: 900,
                     lineHeight: 1,
                   }}
                 >
@@ -244,11 +260,12 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
                 </span>
                 <span
                   style={{
-                    color: "rgba(255,255,255,0.6)",
-                    fontSize: 18,
+                    color: "rgba(255,255,255,0.5)",
+                    fontSize: 16,
                     fontWeight: 700,
                     textTransform: "uppercase",
-                    marginTop: 4,
+                    marginTop: 2,
+                    letterSpacing: "0.02em",
                   }}
                 >
                   {stat.label}
@@ -259,7 +276,7 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
         ))}
       </div>
 
-      {/* ── FOOTER: Logo Only ────────────────────────────────── */}
+      {/* ── FOOTER: Logo Only (Taller, centered logo) ────────────────── */}
       <div
         style={{
           position: "absolute",
@@ -271,18 +288,19 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          paddingBottom: 40,
+          paddingBottom: 20,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 30 }}>
           <div
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: 800,
-              color: "#333",
+              color: "#666",
               writingMode: "vertical-rl",
               transform: "rotate(180deg)",
-              opacity: 0.6,
+              opacity: 0.5,
+              letterSpacing: "0.05em",
             }}
           >
             CJ {property.id.replace(/^u-/, "")}
@@ -291,16 +309,17 @@ const RizzoStory: React.FC<RizzoStoryProps> = ({
             <img
               src={brand.logoUrl}
               alt=""
-              style={{ height: 80, maxWidth: 400, objectFit: "contain" }}
+              style={{ height: 100, maxWidth: 500, objectFit: "contain" }}
             />
           ) : (
-            <span style={{ fontSize: 48, fontWeight: 900, color: "#e50046" }}>RIZZO</span>
+            <span style={{ fontSize: 64, fontWeight: 900, color: "#e50046", letterSpacing: "-0.02em" }}>RIZZO</span>
           )}
         </div>
       </div>
     </div>
   );
 };
+
 
 export const SR_VendaRizzo: React.FC<TemplateProps> = (props) => (
   <RizzoStory {...props} variant="venda" />
