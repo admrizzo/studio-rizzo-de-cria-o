@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return { error: "Não autenticado" };
     const { error } = await supabase
       .from("studio_profiles")
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...data, updated_at: new Date().toISOString() } as any)
       .eq("id", user.id);
     if (!error) {
       setProfile(prev => prev ? { ...prev, ...data } : null);
