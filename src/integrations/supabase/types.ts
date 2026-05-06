@@ -178,6 +178,51 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_brand_settings: {
+        Row: {
+          contato: string | null
+          cor_primaria: string | null
+          cor_secundaria: string | null
+          created_at: string
+          feed_url: string | null
+          id: string
+          logo_url: string | null
+          nome: string | null
+          slide_speed: string | null
+          updated_at: string
+          video_display: Json | null
+          whatsapp: string | null
+        }
+        Insert: {
+          contato?: string | null
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          feed_url?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string | null
+          slide_speed?: string | null
+          updated_at?: string
+          video_display?: Json | null
+          whatsapp?: string | null
+        }
+        Update: {
+          contato?: string | null
+          cor_primaria?: string | null
+          cor_secundaria?: string | null
+          created_at?: string
+          feed_url?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string | null
+          slide_speed?: string | null
+          updated_at?: string
+          video_display?: Json | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       studio_profiles: {
         Row: {
           created_at: string
