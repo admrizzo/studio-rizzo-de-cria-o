@@ -455,8 +455,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   }, []);
 
   const buildExportProps = useCallback(async (): Promise<TemplateProps> => {
-    const [photoUrl, logoUrl, agentPhoto] = await Promise.all([
+    const [photoUrl, secondaryPhotoUrl, logoUrl, agentPhoto] = await Promise.all([
       proxifyUrl(currentPhoto).catch(() => currentPhoto),
+      currentSecondaryPhoto
+        ? proxifyUrl(currentSecondaryPhoto).catch(() => currentSecondaryPhoto)
+        : Promise.resolve(""),
       proxifyUrl(brand.logoUrl).catch(() => brand.logoUrl || ""),
       proxifyUrl(profile?.foto_url).catch(() => profile?.foto_url || ""),
     ]);
@@ -464,10 +467,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
     return {
       property,
       photoUrl,
+      secondaryPhotoUrl,
       brand: { ...brand, logoUrl },
       agent: profile ? { ...profile, foto_url: agentPhoto } : profile,
     };
-  }, [brand, currentPhoto, profile, property, proxifyUrl]);
+  }, [brand, currentPhoto, currentSecondaryPhoto, profile, property, proxifyUrl]);
 
   const handleExport = useCallback(async (template: TemplateConfig) => {
     flushSync(() => {
