@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useApp } from "@/contexts/AppContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { Property } from "@/types/property";
+import { supabase } from "@/integrations/supabase/client";
 
 import { isRobustCRMFeed, parseRobustCRMFeed } from "@/utils/robustcrm";
 import { Button } from "@/components/ui/button";
@@ -79,23 +80,22 @@ const JsonImporter = () => {
     setError(null);
     try {
       const targetUrl = apiUrl.trim();
-      const proxies = [
-        targetUrl,
-        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-      ];
-      let res: Response | null = null;
-      for (const url of proxies) {
-        try {
-          const r = await fetch(url);
-          if (r.ok) { res = r; break; }
-        } catch { continue; }
+      
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('fetch-feed', {
+        body: { url: targetUrl }
+      });
+
+      if (edgeError) {
+        console.error("Erro na Edge Function:", edgeError);
+        throw new Error(edgeError.message || "Erro ao buscar feed via proxy.");
       }
-      if (!res) throw new Error("Não foi possível acessar a API. Verifique a URL.");
-      if (!res.ok) throw new Error(`Erro HTTP ${res.status}: ${res.statusText}`);
-      const data = await res.json();
-      processData(data);
+
+      if (!edgeData) throw new Error("Não foi possível acessar a API. Resposta vazia.");
+      if (edgeData.error) throw new Error(edgeData.error);
+      
+      processData(edgeData);
     } catch (e: any) {
+      console.error("Erro na importação:", e);
       setError(e.message);
     } finally {
       setLoading(false);
