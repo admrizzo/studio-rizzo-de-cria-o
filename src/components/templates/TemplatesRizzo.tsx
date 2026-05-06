@@ -1,26 +1,33 @@
 import React from "react";
 import { TemplateProps, cleanBairro, formatPrice } from "./templateTypes";
 import { AreaIcon, QuartosIcon, SuitesIcon, VagasIcon } from "./PropertyIcons";
-import { AgentSignature } from "./AgentSignature";
 
 /**
- * Templates oficiais Rizzo Imobiliária (baseados nos PSDs do marketing).
- * Story 1080x1920. Suporta duas fotos: principal (topo) + secundária (base).
- * Se houver apenas uma foto, ocupa toda a área.
- * Se não houver foto, mostra estado claro pedindo imagem.
+ * Templates oficiais Rizzo Imobiliária.
+ * Story 1080x1920.
+ * Design fiel ao PNG do marketing.
  */
 
-const PIN_ICON = (
-  <svg width={32} height={32} viewBox="0 0 24 24" fill="none">
-    <path d="M12 22s8-7.5 8-13a8 8 0 10-16 0c0 5.5 8 13 8 13z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-    <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="2" />
+const OFFICIAL_COLORS = {
+  azulEscuro: "#344650",
+  verde: "#61ac81",
+  amarelo: "#f0ae00",
+  azulClaro: "#658bc8",
+  branco: "#ffffff",
+  pinkRizzo: "#e50046",
+};
+
+const PIN_ICON_RIZZO = (
+  <svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+    <path
+      d="M12 21s-7-4.5-7-10a7 7 0 1 1 14 0c0 5.5-7 10-7 10z"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinejoin="round"
+    />
+    <circle cx="12" cy="11" r="2.5" stroke="currentColor" strokeWidth="2.5" />
   </svg>
 );
-
-interface RizzoTemplateProps extends TemplateProps {
-  /** Pink/magenta = venda. Yellow = locacao. */
-  variant: "venda" | "locacao";
-}
 
 const formatPriceOrConsult = (price: number) => {
   if (!price || price <= 0) return "Sob consulta";
@@ -51,52 +58,44 @@ const NoPhotoState: React.FC<{ accent: string }> = ({ accent }) => (
   </div>
 );
 
-const RizzoStory: React.FC<RizzoTemplateProps> = ({ property, brand, agent, photoUrl, secondaryPhotoUrl, variant }) => {
+interface RizzoStoryProps extends TemplateProps {
+  variant: "venda" | "locacao";
+}
+
+const RizzoStory: React.FC<RizzoStoryProps> = ({
+  property,
+  brand,
+  photoUrl,
+  secondaryPhotoUrl,
+  variant,
+}) => {
   const isVenda = variant === "venda";
-  // Reference palette
-  const accent = isVenda ? "#E8345E" : "#F5C033"; // pink vs yellow
-  const accentText = isVenda ? "white" : "#1a1a1a";
-  const accentSoft = isVenda ? "rgba(232,52,94,0.92)" : "rgba(245,192,51,0.95)";
+  const accent = isVenda ? OFFICIAL_COLORS.pinkRizzo : OFFICIAL_COLORS.amarelo;
+  const destinacaoLabel = isVenda ? "VENDA" : "ALUGUEL";
 
   const bairro = cleanBairro(property.bairro);
   const tipo = (property.tipo || "Imóvel").trim();
   const tipoBairro = bairro ? `${tipo} - ${bairro}` : tipo;
-  const destinacaoLabel = isVenda ? "VENDA" : "ALUGUEL";
 
   const price = isVenda
-    ? property.valorVenda ?? property.preco
-    : property.valorLocacao ?? property.preco;
+    ? property.valorVenda || property.preco
+    : property.valorLocacao || property.preco;
   const priceText = formatPriceOrConsult(price || 0);
 
-  const hasMain = !!photoUrl;
-  const hasSecondary = !!secondaryPhotoUrl && secondaryPhotoUrl !== photoUrl;
+  const photo1 = photoUrl;
+  const photo2 = secondaryPhotoUrl || photoUrl;
 
-  if (!hasMain) {
-    return (
-      <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
-        <NoPhotoState accent={accent} />
-      </div>
-    );
+  if (!photo1) {
+    return <NoPhotoState accent={accent} />;
   }
 
-  // Stats row (only show what exists)
-  const stats: { icon: React.FC<any>; text: string }[] = [];
-  if (property.area > 0) stats.push({ icon: AreaIcon, text: `${property.area.toLocaleString("pt-BR")} m²` });
-  if (property.quartos > 0) stats.push({ icon: QuartosIcon, text: `${property.quartos} quartos` });
-  if ((property.suites ?? 0) > 0) stats.push({ icon: SuitesIcon, text: `${property.suites} suítes` });
-  if (property.vagas > 0) stats.push({ icon: VagasIcon, text: `${property.vagas} vagas` });
-
-  // Layout heights (1920 total)
-  // Header: 0-260 (safe top buffer for IG UI ~250)
-  // Photo area: 260-1480 (or split if 2 photos)
-  // Bottom info: 1480-1700 (price + stats)
-  // Footer: 1700-1920 (logo + safe bottom)
-
-  const photoTop = 260;
-  const photoBottom = 1480;
-  const photoHeight = photoBottom - photoTop;
-  const gap = hasSecondary ? 12 : 0;
-  const splitHeight = hasSecondary ? Math.floor((photoHeight - gap) / 2) : photoHeight;
+  // Stats for the stats bar
+  const statsList = [
+    { icon: AreaIcon, value: property.area, label: "m²", show: property.area > 0 },
+    { icon: QuartosIcon, value: property.quartos, label: "quartos", show: property.quartos > 0 },
+    { icon: SuitesIcon, value: property.suites, label: "suítes", show: (property.suites ?? 0) > 0 },
+    { icon: VagasIcon, value: property.vagas, label: "vagas", show: property.vagas > 0 },
+  ].filter((s) => s.show);
 
   return (
     <div
@@ -104,293 +103,210 @@ const RizzoStory: React.FC<RizzoTemplateProps> = ({ property, brand, agent, phot
         position: "relative",
         width: "100%",
         height: "100%",
+        background: "#000",
+        fontFamily: "'Barlow', sans-serif",
         overflow: "hidden",
-        background: "#ECECEC",
-        fontFamily: "Barlow, sans-serif",
       }}
     >
-      {/* ── HEADER: Pill "Dê um endereço ao seu sonho" ───────── */}
-      <div
-        style={{
-          position: "absolute",
-          top: 130,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            position: "relative",
-            background: accent,
-            color: accentText,
-            padding: "22px 56px 38px",
-            fontSize: 30,
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-            borderRadius: "0 0 200px 200px",
-            minWidth: 480,
-            textAlign: "center",
-            boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
-          }}
-        >
-          Dê um <strong style={{ fontWeight: 900 }}>endereço</strong> ao seu <strong style={{ fontWeight: 900 }}>sonho</strong>
-        </div>
-      </div>
-
-      {/* ── PHOTOS ─────────────────────────────────────────────── */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: photoTop,
-          height: photoHeight,
-          background: "#0a0a0a",
-        }}
-      >
+      {/* ── PHOTOS (50/50 split) ─────────────────────────────── */}
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "50%" }}>
         <img
-          src={photoUrl}
+          src={photo1}
           alt=""
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 0,
-            width: "100%",
-            height: splitHeight,
-            objectFit: "cover",
-            display: "block",
-          }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
-        {hasSecondary && (
-          <img
-            src={secondaryPhotoUrl}
-            alt=""
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: splitHeight + gap,
-              width: "100%",
-              height: splitHeight,
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        )}
-
-        {/* Pill row: VENDA/ALUGUEL + tipo+bairro — overlaid on first photo */}
-        <div
-          style={{
-            position: "absolute",
-            left: 40,
-            right: 40,
-            top: 200,
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div
-            style={{
-              background: accent,
-              color: accentText,
-              padding: "18px 38px",
-              borderRadius: 999,
-              fontSize: 32,
-              fontWeight: 900,
-              letterSpacing: "0.08em",
-              boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-            }}
-          >
-            {destinacaoLabel}
-          </div>
-
-          <div
-            style={{
-              background: "rgba(40,40,40,0.78)",
-              color: "white",
-              padding: "16px 28px",
-              borderRadius: 999,
-              fontSize: 28,
-              fontWeight: 600,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              border: `1.5px solid ${accentSoft}`,
-              boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-              maxWidth: "calc(100% - 220px)",
-            }}
-          >
-            <span style={{ color: accent, display: "flex", alignItems: "center" }}>{PIN_ICON}</span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tipoBairro}</span>
-          </div>
-        </div>
-
-        {/* Price pill — overlaid centered near bottom of photos */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 90,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              background: accent,
-              color: accentText,
-              padding: "20px 56px",
-              borderRadius: 999,
-              fontSize: 50,
-              fontWeight: 900,
-              letterSpacing: "0.01em",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-              fontFamily: "Barlow, sans-serif",
-            }}
-          >
-            {priceText}
-          </div>
-        </div>
-
-        {/* Stats pill — translucent, just under price */}
-        {stats.length > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              left: 40,
-              right: 40,
-              bottom: 24,
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(40,40,40,0.78)",
-                borderRadius: 16,
-                padding: "16px 22px",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: "white",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.25)",
-              }}
-            >
-              {stats.map((s, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && (
-                    <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.25)", margin: "0 6px" }} />
-                  )}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <s.icon size={36} color={accent} />
-                    <span style={{ fontSize: 26, fontWeight: 700, whiteSpace: "nowrap" }}>{s.text}</span>
-                  </div>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        )}
+      </div>
+      <div style={{ position: "absolute", top: "50%", left: 0, width: "100%", height: "50%" }}>
+        <img
+          src={photo2}
+          alt=""
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
       </div>
 
-      {/* ── FOOTER: Logo + corretor opcional ──────────────────── */}
+      {/* ── OVERLAYS ─────────────────────────────────────────── */}
+
+      {/* 1. Header Bar: Destinação + Endereço (Top of first photo) */}
       <div
         style={{
           position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 1920 - photoBottom,
-          background: "#ECECEC",
+          top: 140,
+          left: 40,
+          right: 40,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 60px 80px",
+          gap: 12,
+          alignItems: "flex-start",
         }}
       >
-        {/* ID + brand block */}
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div
+          style={{
+            background: accent,
+            color: isVenda ? "#fff" : "#000",
+            padding: "16px 36px",
+            borderRadius: 999,
+            fontSize: 34,
+            fontWeight: 900,
+            letterSpacing: "0.08em",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+          }}
+        >
+          {destinacaoLabel}
+        </div>
+
+        <div
+          style={{
+            background: "rgba(0,0,0,0.65)",
+            color: "#fff",
+            padding: "14px 30px",
+            borderRadius: 999,
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: `2px solid ${accent}`,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
+            maxWidth: "100%",
+          }}
+        >
+          <span style={{ color: accent, display: "flex" }}>{PIN_ICON_RIZZO}</span>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {tipoBairro}
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Price Pill (Above stats bar, over second photo) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 340,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            background: accent,
+            color: isVenda ? "#fff" : "#000",
+            padding: "20px 60px",
+            borderRadius: 999,
+            fontSize: 58,
+            fontWeight: 900,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+          }}
+        >
+          {priceText}
+        </div>
+      </div>
+
+      {/* 3. Stats Bar (Bottom of second photo) */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 200,
+          left: 40,
+          right: 40,
+          height: 110,
+          background: "rgba(0,0,0,0.7)",
+          borderRadius: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          padding: "0 20px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          backdropFilter: "blur(8px)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+        }}
+      >
+        {statsList.map((stat, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && (
+              <div style={{ width: 2, height: 40, background: "rgba(255,255,255,0.2)" }} />
+            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <stat.icon size={38} color={accent} />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span
+                  style={{
+                    color: "#fff",
+                    fontSize: 32,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                  }}
+                >
+                  {stat.value}
+                </span>
+                <span
+                  style={{
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: 18,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    marginTop: 4,
+                  }}
+                >
+                  {stat.label}
+                </span>
+              </div>
+            </div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* ── FOOTER: Logo Only ────────────────────────────────── */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 180,
+          background: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingBottom: 40,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div
             style={{
               fontSize: 16,
-              fontWeight: 700,
-              color: "#1a1a1a",
-              letterSpacing: "0.08em",
-              writingMode: "vertical-rl" as const,
+              fontWeight: 800,
+              color: "#333",
+              writingMode: "vertical-rl",
               transform: "rotate(180deg)",
-              textTransform: "uppercase",
-              opacity: 0.85,
+              opacity: 0.6,
             }}
           >
             CJ {property.id.replace(/^u-/, "")}
           </div>
-
           {brand.logoUrl ? (
             <img
               src={brand.logoUrl}
-              alt={brand.nome || "Logo"}
-              style={{ height: 110, maxWidth: 460, objectFit: "contain" }}
+              alt=""
+              style={{ height: 80, maxWidth: 400, objectFit: "contain" }}
             />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <div style={{ fontSize: 80, fontWeight: 900, color: "#1a1a1a", lineHeight: 1, letterSpacing: "-0.02em" }}>
-                {brand.nome || "Imobiliária"}
-              </div>
-            </div>
+            <span style={{ fontSize: 48, fontWeight: 900, color: "#e50046" }}>RIZZO</span>
           )}
         </div>
-
-        {/* Optional agent line */}
-        {agent?.nome && (
-          <div style={{ marginTop: 18 }}>
-            <AgentSignature
-              agent={agent}
-              nameColor="#1a1a1a"
-              creciColor="rgba(26,26,26,0.55)"
-              borderColor="rgba(26,26,26,0.2)"
-              badgeColor={accent}
-              photoSize={56}
-            />
-          </div>
-        )}
-
-        {/* Optional WhatsApp/contact CTA */}
-        {brand.whatsapp && !agent?.nome && (
-          <div
-            style={{
-              marginTop: 14,
-              fontSize: 22,
-              fontWeight: 600,
-              color: "#1a1a1a",
-              opacity: 0.7,
-            }}
-          >
-            WhatsApp {brand.whatsapp}
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   STORY VENDA RIZZO (rosa/magenta)
-   ═══════════════════════════════════════════════════════════════ */
 export const SR_VendaRizzo: React.FC<TemplateProps> = (props) => (
   <RizzoStory {...props} variant="venda" />
 );
 
-/* ═══════════════════════════════════════════════════════════════
-   STORY LOCAÇÃO RIZZO (amarelo)
-   ═══════════════════════════════════════════════════════════════ */
 export const SR_LocacaoRizzo: React.FC<TemplateProps> = (props) => (
   <RizzoStory {...props} variant="locacao" />
 );
+

@@ -350,9 +350,9 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   const thumbs = property.fotosSmall?.length === photos.length ? property.fotosSmall : photos;
   const currentPhoto = photos[selectedPhotoIdx] || photos[0] || "";
   const currentSecondaryPhoto =
-    photos.length > 1 && secondaryPhotoIdx !== selectedPhotoIdx
-      ? photos[secondaryPhotoIdx] || ""
-      : "";
+    photos.length > 1
+      ? photos[secondaryPhotoIdx] || photos[0]
+      : photos[0] || "";
 
   // Negotiation hint: which Rizzo template to recommend
   const hasVenda = (property.valorVenda ?? 0) > 0;
@@ -379,9 +379,6 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   useEffect(() => {
     if (selectedPhotoIdx >= photos.length) setSelectedPhotoIdx(0);
     if (secondaryPhotoIdx >= photos.length) setSecondaryPhotoIdx(photos.length > 1 ? 1 : 0);
-    if (secondaryPhotoIdx === selectedPhotoIdx && photos.length > 1) {
-      setSecondaryPhotoIdx((selectedPhotoIdx + 1) % photos.length);
-    }
   }, [photos.length, selectedPhotoIdx, secondaryPhotoIdx]);
 
   useEffect(() => {
