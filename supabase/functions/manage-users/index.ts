@@ -31,9 +31,9 @@ async function requireAdmin(req: Request) {
   if (!caller) throw new Error("Não autorizado");
 
   const { data: roleData } = await supabase
-    .from("user_roles")
+    .from("studio_profiles")
     .select("role")
-    .eq("user_id", caller.id)
+    .eq("id", caller.id)
     .in("role", ["super_admin", "admin"]);
 
   if (!roleData || roleData.length === 0) {
@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
     // ─── LIST USERS ───
     if (action === "list") {
       const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, nome, telefone, whatsapp, creci, foto_url, created_at")
+        .from("studio_profiles")
+        .select("id, nome, telefone, whatsapp, creci, foto_url, role, created_at")
         .order("nome", { ascending: true });
 
       const { data: authList } = await supabase.auth.admin.listUsers({
@@ -69,19 +69,10 @@ Deno.serve(async (req) => {
         if (u.email) emailMap[u.id] = u.email;
       }
 
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-      const rolesMap: Record<string, string[]> = {};
-      for (const r of roles || []) {
-        if (!rolesMap[r.user_id]) rolesMap[r.user_id] = [];
-        rolesMap[r.user_id].push(r.role);
-      }
-
       const users = (profiles || []).map((p: any) => ({
         ...p,
         email: emailMap[p.id] || null,
-        roles: rolesMap[p.id] || [],
+        roles: [p.role],
       }));
 
       return json({ users });
@@ -116,7 +107,7 @@ Deno.serve(async (req) => {
       if (foto_url !== undefined) update.foto_url = foto_url;
 
       const { error } = await supabase
-        .from("profiles")
+        .from("studio_profiles")
         .update(update)
         .eq("id", user_id);
       if (error) return json({ error: error.message }, 400);
@@ -154,7 +145,7 @@ Deno.serve(async (req) => {
       const url = `${urlData.publicUrl}?t=${Date.now()}`;
 
       await supabase
-        .from("profiles")
+        .from("studio_profiles")
         .update({ foto_url: url, updated_at: new Date().toISOString() })
         .eq("id", user_id);
 
@@ -163,17 +154,17 @@ Deno.serve(async (req) => {
 
     // ─── UPDATE ROLE ───
     if (action === "update_role") {
-      const { user_id, role, remove } = body;
+      const { user_id, role } = body;
       if (!user_id || !role) {
         return json({ error: "user_id e role obrigatórios" }, 400);
       }
-      if (remove) {
-        await supabase.from("user_roles").delete().eq("user_id", user_id).eq("role", role);
-      } else {
-        await supabase
-          .from("user_roles")
-          .upsert({ user_id, role }, { onConflict: "user_id,role" });
-      }
+      
+      const { error } = await supabase
+        .from("studio_profiles")
+        .update({ role, updated_at: new Date().toISOString() })
+        .eq("id", user_id);
+        
+      if (error) return json({ error: error.message }, 400);
       return json({ success: true });
     }
 
@@ -183,11 +174,12 @@ Deno.serve(async (req) => {
       if (!user_id) return json({ error: "user_id obrigatório" }, 400);
 
       // Bloqueia exclusão de super_admin
-      const { data: targetRoles } = await supabase
-        .from("user_roles")
+      const { data: targetProfile } = await supabase
+        .from("studio_profiles")
         .select("role")
-        .eq("user_id", user_id);
-      if ((targetRoles || []).some((r: any) => r.role === "super_admin")) {
+        .eq("id", user_id)
+        .single();
+      if (targetProfile?.role === "super_admin") {
         return json({ error: "Super Admin não pode ser excluído" }, 400);
       }
 
@@ -203,9 +195,8 @@ Deno.serve(async (req) => {
         }
       } catch (_) {}
 
-      // Remove roles e profile (FK não-existente, então deletar manualmente)
-      await supabase.from("user_roles").delete().eq("user_id", user_id);
-      await supabase.from("profiles").delete().eq("id", user_id);
+      // Remove profile
+      await supabase.from("studio_profiles").delete().eq("id", user_id);
 
       // Remove do auth — isso cascateia no profiles via id, mas já garantimos acima
       const { error } = await supabase.auth.admin.deleteUser(user_id);
