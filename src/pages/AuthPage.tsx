@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,8 @@ import { LogIn, Mail, Lock, ArrowRight, Loader2, Film, ImageIcon, Wand2 } from "
 import BrandMark from "@/components/BrandMark";
 
 const AuthPage = () => {
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
