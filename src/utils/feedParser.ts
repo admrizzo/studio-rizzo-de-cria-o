@@ -29,14 +29,36 @@ const extractPhotos = (media?: { imagens?: CRMImage[] }): { full: string[]; smal
 };
 
 const getNum = (v: any): number => {
-  if (typeof v === "number") return v;
-  if (v && typeof v === "object" && "valor" in v) return Number(v.valor) || 0;
-  if (v && typeof v === "object") {
+  if (v == null) return 0;
+  if (typeof v === "number") return isFinite(v) ? v : 0;
+  if (typeof v === "string") {
+    // Handle "R$ 1.200.000,00" or "1200000.00" or "1.200,50"
+    const cleaned = v.replace(/[R$\s]/gi, "").replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(cleaned);
+    return isFinite(n) ? n : 0;
+  }
+  if (typeof v === "object") {
+    if ("valor" in v) return getNum((v as any).valor);
     let sum = 0;
-    for (const val of Object.values(v)) sum += Number(val) || 0;
+    for (const val of Object.values(v)) sum += getNum(val);
     return sum;
   }
-  return Number(v) || 0;
+  return 0;
+};
+
+/** Parse price - returns null if missing/invalid (vs 0 for "free") */
+const parsePrice = (v: any): number | null => {
+  if (v == null) return null;
+  if (typeof v === "object" && !Array.isArray(v)) {
+    if ("valor" in v) {
+      const inner = (v as any).valor;
+      if (inner == null) return null;
+      const n = getNum(inner);
+      return n > 0 ? n : null;
+    }
+  }
+  const n = getNum(v);
+  return n > 0 ? n : null;
 };
 
 export interface ParsedFeed {
@@ -90,9 +112,15 @@ export function parseCRMFeed(feed: any): ParsedFeed {
 
     if (allFull.length === 0) continue;
 
-    const area = unit.areas?.area_privativa || unit.areas?.area_total || unit.area_privativa || unit.area_total || 0;
-    const vVenda = getNum(unit.valor_venda);
-    const vLocacao = getNum(unit.valor_locacao);
+    const area = getNum(unit.areas?.privativa) || getNum(unit.areas?.total) || getNum(unit.areas?.area_privativa) || getNum(unit.areas?.area_total) || getNum(unit.area_privativa) || getNum(unit.area_total) || 0;
+    const vVenda = parsePrice(unit.valor_venda);
+    const vLocacao = parsePrice(unit.valor_locacao);
+    const precoPrincipal = vVenda ?? vLocacao ?? 0;
+    const tipoNeg = unit.tipo_negociacao
+      || (vVenda && vLocacao ? "Venda,Locação" : vVenda ? "Venda" : vLocacao ? "Locação" : "");
+    if (precoPrincipal === 0) {
+      console.warn(`[feedParser] Imóvel ${unit.id} sem preço:`, { vV: unit.valor_venda, vL: unit.valor_locacao });
+    }
     const endStr = endereco ? [endereco.logradouro, endereco.numero].filter(Boolean).join(", ") : "";
 
     const titulo = unit.titulo ||
@@ -103,7 +131,7 @@ export function parseCRMFeed(feed: any): ParsedFeed {
       id: `u-${unit.id}`,
       titulo,
       tipo: unit.tipo || "Imóvel",
-      preco: vVenda || vLocacao || 0,
+      preco: precoPrincipal,
       endereco: endStr,
       bairro: endereco?.bairro || "",
       cidade: endereco?.cidade || "",
@@ -117,8 +145,9 @@ export function parseCRMFeed(feed: any): ParsedFeed {
       fotosSmall: allSmall,
       destaque: unit.exibicao === "destaque",
       suites: getNum(unit.suites),
-      valorVenda: vVenda,
-      valorLocacao: vLocacao,
+      valorVenda: vVenda ?? 0,
+      valorLocacao: vLocacao ?? 0,
+      tipoNegociacao: tipoNeg,
       situacao: unit.situacao || "",
       condominio: condoName,
       destinacao: unit.destinacao || "",

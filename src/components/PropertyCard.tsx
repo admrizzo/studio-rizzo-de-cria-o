@@ -56,9 +56,9 @@ const PropertyCard = ({ property, index, selectionMode, isSelected, onToggleSele
               ID {property.id.replace(/^[a-zA-Z]-/, "")}
             </span>
           </div>
-          {property.preco > 0 && (
-            <p className="text-white font-bold text-lg sm:text-2xl mt-1.5 sm:mt-2 drop-shadow-lg">{formatPrice(property.preco)}</p>
-          )}
+          <p className="text-white font-bold text-lg sm:text-2xl mt-1.5 sm:mt-2 drop-shadow-lg">
+            {property.preco > 0 ? formatPrice(property.preco) : "Sob consulta"}
+          </p>
         </div>
         {property.destaque && (
           <div className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500 text-white">
