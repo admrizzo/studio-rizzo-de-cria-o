@@ -779,6 +779,7 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
                       onPreview={setPreviewTemplate}
                       onDownload={handleExport}
                       exporting={exporting}
+                      recommended={recommendedRizzoId === template.id}
                     />
                   ))}
                 </div>
