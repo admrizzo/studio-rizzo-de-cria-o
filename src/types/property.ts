@@ -21,6 +21,7 @@ export interface Property {
   valorVenda?: number;
   valorLocacao?: number;
   situacao?: string;
+  tipoNegociacao?: string;
 }
 
 export interface VideoDisplayConfig {
