@@ -14,11 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Barlow", "sans-serif"],
-        display: ["Barlow Condensed", "Barlow", "sans-serif"],
-        semi: ["Barlow Semi Condensed", "Barlow", "sans-serif"],
-        serif: ["Playfair Display", "serif"],
-        headline: ["Bebas Neue", "sans-serif"],
+        sans: ["Inter", "sans-serif"],
+        display: ["Inter", "sans-serif"],
+        semi: ["Inter", "sans-serif"],
+        headline: ["Inter", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

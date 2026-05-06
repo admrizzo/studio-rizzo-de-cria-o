@@ -207,8 +207,8 @@ const Index = () => {
               className="text-center space-y-6 max-w-xl"
             >
               <div className="flex justify-center"><BrandMark size="xl" /></div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight uppercase" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                STUDIOS DE CRIAÇÃO
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                STUDIO
               </h1>
               <p className="text-muted-foreground text-lg leading-relaxed">
                 Crie <span className="text-foreground font-semibold">vídeos</span>, <span className="text-foreground font-semibold">artes</span> e <span className="text-foreground font-semibold">legendas</span> profissionais para seus imóveis
@@ -246,8 +246,8 @@ const Index = () => {
                   <div className="flex items-center gap-4">
                     <BrandMark size="lg" showText={false} />
                     <div>
-                      <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight uppercase" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                        STUDIOS DE CRIAÇÃO
+                      <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        STUDIO
                       </h1>
                       <p className="text-muted-foreground text-sm mt-0.5">
                         Vídeos, artes e legendas profissionais para seus imóveis
