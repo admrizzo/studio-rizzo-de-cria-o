@@ -29,14 +29,36 @@ const extractPhotos = (media?: { imagens?: CRMImage[] }): { full: string[]; smal
 };
 
 const getNum = (v: any): number => {
-  if (typeof v === "number") return v;
-  if (v && typeof v === "object" && "valor" in v) return Number(v.valor) || 0;
-  if (v && typeof v === "object") {
+  if (v == null) return 0;
+  if (typeof v === "number") return isFinite(v) ? v : 0;
+  if (typeof v === "string") {
+    // Handle "R$ 1.200.000,00" or "1200000.00" or "1.200,50"
+    const cleaned = v.replace(/[R$\s]/gi, "").replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(cleaned);
+    return isFinite(n) ? n : 0;
+  }
+  if (typeof v === "object") {
+    if ("valor" in v) return getNum((v as any).valor);
     let sum = 0;
-    for (const val of Object.values(v)) sum += Number(val) || 0;
+    for (const val of Object.values(v)) sum += getNum(val);
     return sum;
   }
-  return Number(v) || 0;
+  return 0;
+};
+
+/** Parse price - returns null if missing/invalid (vs 0 for "free") */
+const parsePrice = (v: any): number | null => {
+  if (v == null) return null;
+  if (typeof v === "object" && !Array.isArray(v)) {
+    if ("valor" in v) {
+      const inner = (v as any).valor;
+      if (inner == null) return null;
+      const n = getNum(inner);
+      return n > 0 ? n : null;
+    }
+  }
+  const n = getNum(v);
+  return n > 0 ? n : null;
 };
 
 export interface ParsedFeed {
