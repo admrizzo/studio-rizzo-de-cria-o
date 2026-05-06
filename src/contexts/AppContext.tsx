@@ -151,7 +151,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
           logoUrl: data.logo_url || null,
           corPrimaria: data.cor_primaria || "#39FF14",
           corSecundaria: data.cor_secundaria || "#ec5a8a",
-          videoDisplay: data.video_display ? { ...defaultVideoDisplay, ...data.video_display } : { ...defaultVideoDisplay },
+          videoDisplay: data.video_display ? { ...defaultVideoDisplay, ...(data.video_display as any) } : { ...defaultVideoDisplay },
           slideSpeed: (data.slide_speed as "slow" | "normal" | "fast") || "normal",
           feedUrl: data.feed_url || "",
         };
@@ -178,7 +178,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
       const saveToDB = async () => {
         try {
           const { data: existing } = await supabase.from("studio_brand_settings").select("id").limit(1).maybeSingle();
-          const dbData = {
+          const dbData: any = {
             nome: next.nome,
             contato: next.contato,
             whatsapp: next.whatsapp,
@@ -193,7 +193,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
           if (existing) {
             await supabase.from("studio_brand_settings").update(dbData).eq("id", existing.id);
           } else {
-            await supabase.from("studio_brand_settings").insert(dbData);
+            await supabase.from("studio_brand_settings").insert([dbData]);
           }
         } catch (err) {
           console.error("Error saving brand to DB:", err);
