@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data) {
-      setProfile(data as AgentProfile);
+      setProfile(data as unknown as AgentProfile);
       setIsAdmin(data.role === "admin" || data.role === "super_admin");
     }
   };
