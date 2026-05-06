@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      module_proposals_correction_requests: {
+        Row: {
+          created_at: string
+          id: string
+          proposal_id: string
+          request_reason: string
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proposal_id: string
+          request_reason: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          request_reason?: string
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_proposals_correction_requests_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "module_proposals_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_proposals_data: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          created_at: string
+          description: string | null
+          id: string
+          internal_user_id: string | null
+          metadata: Json | null
+          secure_token: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_user_id?: string | null
+          metadata?: Json | null
+          secure_token?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          internal_user_id?: string | null
+          metadata?: Json | null
+          secure_token?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      module_proposals_documents: {
+        Row: {
+          correction_request_id: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          proposal_id: string
+          uploaded_by_client: boolean | null
+        }
+        Insert: {
+          correction_request_id?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          proposal_id: string
+          uploaded_by_client?: boolean | null
+        }
+        Update: {
+          correction_request_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          proposal_id?: string
+          uploaded_by_client?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_proposals_documents_correction_request_id_fkey"
+            columns: ["correction_request_id"]
+            isOneToOne: false
+            referencedRelation: "module_proposals_correction_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_proposals_documents_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "module_proposals_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
