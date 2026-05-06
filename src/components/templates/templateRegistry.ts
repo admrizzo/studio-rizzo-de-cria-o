@@ -2,8 +2,13 @@ import { TemplateConfig } from "./templateTypes";
 import { S1_PrecoImpacto, S2_Lifestyle, S3_Editorial, S4_Urgencia, S5_Moderno } from "./TemplatesSet1";
 import { P1_HeroImovel, P2_PrecoDominante, P3_InformativoPremium, P4_Conceitual, P5_CorretorDestaque } from "./TemplatesSet2";
 import { S6_DarkGold, S7_Glass, S8_SplitDiagonal, S10_Terracota, S11_FichaClean, P6_Investidor, P7_SplitClean, P8_LifestylePost, P9_UrgenciaPost, P10_RupturaPost } from "./TemplatesSet3";
+import { SR_VendaRizzo, SR_LocacaoRizzo } from "./TemplatesRizzo";
 
 export const allTemplates: TemplateConfig[] = [
+  // ─── OFICIAIS RIZZO (marketing) ───
+  { id: "sr-venda",   name: "Story Venda Rizzo",    category: "vibrante",  format: "stories", focus: "preco",    component: SR_VendaRizzo },
+  { id: "sr-locacao", name: "Story Locação Rizzo",  category: "vibrante",  format: "stories", focus: "preco",    component: SR_LocacaoRizzo },
+
   // ─── STORIES 9:16 ───
   { id: "s1",  name: "Preço Impacto",       category: "vibrante",  format: "stories", focus: "preco",    component: S1_PrecoImpacto },
   { id: "s2",  name: "Lifestyle",           category: "luxo",      format: "stories", focus: "geral",    component: S2_Lifestyle },
