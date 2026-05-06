@@ -414,8 +414,9 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
       brand,
       agent: profile,
       photoUrl: currentPhoto,
+      secondaryPhotoUrl: currentSecondaryPhoto,
     }),
-    [property, brand, profile, currentPhoto],
+    [property, brand, profile, currentPhoto, currentSecondaryPhoto],
   );
 
   const proxifyUrl = useCallback(async (src?: string | null) => {
