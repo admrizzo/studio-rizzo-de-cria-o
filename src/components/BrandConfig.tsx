@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { Input } from "@/components/ui/input";
@@ -62,6 +62,12 @@ const BrandConfig = () => {
   const { blockWrite } = useDemo();
   const [form, setForm] = useState({ ...brand });
   const [logoPreview, setLogoPreview] = useState(brand.logoUrl);
+
+  useEffect(() => {
+    setForm({ ...brand });
+    setLogoPreview(brand.logoUrl);
+  }, [brand]);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {

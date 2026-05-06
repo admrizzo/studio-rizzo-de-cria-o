@@ -135,24 +135,73 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
     setCuratedPhotosMap(prev => ({ ...prev, [propertyId]: photos }));
   };
 
+  const fetchBrandFromDB = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("studio_brand_settings")
+        .select("*")
+        .limit(1)
+        .maybeSingle();
+      
+      if (data && !error) {
+        const mappedBrand: BrandConfig = {
+          nome: data.nome || "",
+          contato: data.contato || "",
+          whatsapp: data.whatsapp || "",
+          logoUrl: data.logo_url || null,
+          corPrimaria: data.cor_primaria || "#39FF14",
+          corSecundaria: data.cor_secundaria || "#ec5a8a",
+          videoDisplay: data.video_display ? { ...defaultVideoDisplay, ...(data.video_display as any) } : { ...defaultVideoDisplay },
+          slideSpeed: (data.slide_speed as "slow" | "normal" | "fast") || "normal",
+          feedUrl: data.feed_url || "",
+        };
+        setBrandState(mappedBrand);
+        localStorage.setItem("sgflix-brand", JSON.stringify(mappedBrand));
+      }
+    } catch (err) {
+      console.error("Error fetching brand from DB:", err);
+    }
+  };
+
   const setBrand = (b: BrandConfig | ((prev: BrandConfig) => BrandConfig)) => {
     setBrandState(prev => {
       const next = typeof b === 'function' ? b(prev) : b;
+      
+      // Save to localStorage as fallback
       try {
-        const json = JSON.stringify(next);
-        localStorage.setItem("sgflix-brand", json);
-        console.log("[Brand] Saved to localStorage:", json.length, "chars");
+        localStorage.setItem("sgflix-brand", JSON.stringify(next));
       } catch (err) {
         console.error("[Brand] localStorage save failed:", err);
-        // If it's a quota error, try saving without the logo
-        try {
-          const slim = { ...next, logoUrl: null };
-          localStorage.setItem("sgflix-brand", JSON.stringify(slim));
-          console.warn("[Brand] Saved without logo (storage full)");
-        } catch {
-          console.error("[Brand] Could not save brand at all");
-        }
       }
+
+      // Save to DB (async)
+      const saveToDB = async () => {
+        try {
+          const { data: existing } = await supabase.from("studio_brand_settings").select("id").limit(1).maybeSingle();
+          const dbData: any = {
+            nome: next.nome,
+            contato: next.contato,
+            whatsapp: next.whatsapp,
+            logo_url: next.logoUrl,
+            cor_primaria: next.corPrimaria,
+            cor_secundaria: next.corSecundaria,
+            video_display: next.videoDisplay,
+            slide_speed: next.slideSpeed,
+            feed_url: next.feedUrl,
+          };
+
+          if (existing) {
+            await supabase.from("studio_brand_settings").update(dbData).eq("id", existing.id);
+          } else {
+            await supabase.from("studio_brand_settings").insert([dbData]);
+          }
+        } catch (err) {
+          console.error("Error saving brand to DB:", err);
+        }
+      };
+      
+      if (!demo) saveToDB();
+      
       return next;
     });
   };
@@ -177,6 +226,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
         return cache;
       }
     } catch (err) {
+      toast.error("Erro ao carregar feed. Verifique a URL nas configurações.");
       console.error("Failed to fetch feed from API:", err);
     }
     return null;
@@ -200,6 +250,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
       setLoading(false);
       return;
     }
+    fetchBrandFromDB();
     const userHasCustomBrand = !!localStorage.getItem("sgflix-brand");
     const loadFeed = async () => {
       const cached = loadCachedFeed();
