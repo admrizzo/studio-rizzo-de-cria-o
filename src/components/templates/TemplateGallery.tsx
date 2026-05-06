@@ -265,6 +265,7 @@ const TemplateThumb = ({
   onPreview,
   onDownload,
   exporting,
+  recommended,
 }: {
   template: TemplateConfig;
   templateProps: TemplateProps;
@@ -272,14 +273,23 @@ const TemplateThumb = ({
   onPreview: (t: TemplateConfig) => void;
   onDownload: (t: TemplateConfig) => void;
   exporting: boolean;
+  recommended?: boolean;
 }) => {
   const isStories = nativeH === STORY_HEIGHT;
 
   return (
     <div
-      className="w-full rounded-2xl border border-border bg-card p-2 text-left shadow-sm"
+      className={cn(
+        "relative w-full rounded-2xl border bg-card p-2 text-left shadow-sm",
+        recommended ? "border-primary ring-2 ring-primary/30" : "border-border",
+      )}
       onClick={(event) => event.stopPropagation()}
     >
+      {recommended && (
+        <span className="absolute -top-2 left-3 z-10 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+          Recomendado
+        </span>
+      )}
       <ScaledCanvas
         Component={template.component}
         props={templateProps}
@@ -330,6 +340,7 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   const [exportingTemplate, setExportingTemplate] = useState<TemplateConfig | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [selectedPhotoIdx, setSelectedPhotoIdx] = useState(0);
+  const [secondaryPhotoIdx, setSecondaryPhotoIdx] = useState<number>(1);
   const [exporting, setExporting] = useState(false);
   const [exportTemplateProps, setExportTemplateProps] = useState<TemplateProps | null>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -338,6 +349,20 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   const photos = property.fotos?.length ? property.fotos : property.fotosSmall || [];
   const thumbs = property.fotosSmall?.length === photos.length ? property.fotosSmall : photos;
   const currentPhoto = photos[selectedPhotoIdx] || photos[0] || "";
+  const currentSecondaryPhoto =
+    photos.length > 1 && secondaryPhotoIdx !== selectedPhotoIdx
+      ? photos[secondaryPhotoIdx] || ""
+      : "";
+
+  // Negotiation hint: which Rizzo template to recommend
+  const hasVenda = (property.valorVenda ?? 0) > 0;
+  const hasLocacao = (property.valorLocacao ?? 0) > 0;
+  const recommendedRizzoId =
+    hasVenda && !hasLocacao
+      ? "sr-venda"
+      : hasLocacao && !hasVenda
+      ? "sr-locacao"
+      : null; // both or neither — recommend none, show both
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -353,7 +378,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
 
   useEffect(() => {
     if (selectedPhotoIdx >= photos.length) setSelectedPhotoIdx(0);
-  }, [photos.length, selectedPhotoIdx]);
+    if (secondaryPhotoIdx >= photos.length) setSecondaryPhotoIdx(photos.length > 1 ? 1 : 0);
+    if (secondaryPhotoIdx === selectedPhotoIdx && photos.length > 1) {
+      setSecondaryPhotoIdx((selectedPhotoIdx + 1) % photos.length);
+    }
+  }, [photos.length, selectedPhotoIdx, secondaryPhotoIdx]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -385,8 +414,9 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
       brand,
       agent: profile,
       photoUrl: currentPhoto,
+      secondaryPhotoUrl: currentSecondaryPhoto,
     }),
-    [property, brand, profile, currentPhoto],
+    [property, brand, profile, currentPhoto, currentSecondaryPhoto],
   );
 
   const proxifyUrl = useCallback(async (src?: string | null) => {
@@ -425,8 +455,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   }, []);
 
   const buildExportProps = useCallback(async (): Promise<TemplateProps> => {
-    const [photoUrl, logoUrl, agentPhoto] = await Promise.all([
+    const [photoUrl, secondaryPhotoUrl, logoUrl, agentPhoto] = await Promise.all([
       proxifyUrl(currentPhoto).catch(() => currentPhoto),
+      currentSecondaryPhoto
+        ? proxifyUrl(currentSecondaryPhoto).catch(() => currentSecondaryPhoto)
+        : Promise.resolve(""),
       proxifyUrl(brand.logoUrl).catch(() => brand.logoUrl || ""),
       proxifyUrl(profile?.foto_url).catch(() => profile?.foto_url || ""),
     ]);
@@ -434,10 +467,11 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
     return {
       property,
       photoUrl,
+      secondaryPhotoUrl,
       brand: { ...brand, logoUrl },
       agent: profile ? { ...profile, foto_url: agentPhoto } : profile,
     };
-  }, [brand, currentPhoto, profile, property, proxifyUrl]);
+  }, [brand, currentPhoto, currentSecondaryPhoto, profile, property, proxifyUrl]);
 
   const handleExport = useCallback(async (template: TemplateConfig) => {
     flushSync(() => {
@@ -613,6 +647,41 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
                     Este imóvel tem uma única foto disponível para as artes.
                   </div>
                 )}
+
+                {photos.length > 1 && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="mb-2 text-xs font-semibold text-foreground">
+                      Foto secundária <span className="font-normal text-muted-foreground">(usada nos templates Rizzo)</span>
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {thumbs.map((thumb, idx) => {
+                        const isPrimary = idx === selectedPhotoIdx;
+                        const isSecondary = idx === secondaryPhotoIdx && !isPrimary;
+                        return (
+                          <button
+                            key={`sec-${thumb}-${idx}`}
+                            type="button"
+                            disabled={isPrimary}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (!isPrimary) setSecondaryPhotoIdx(idx);
+                            }}
+                            className={cn(
+                              "h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all sm:h-16 sm:w-16",
+                              isSecondary
+                                ? "border-primary shadow-md"
+                                : isPrimary
+                                ? "border-dashed border-muted opacity-30 cursor-not-allowed"
+                                : "border-border opacity-70 hover:opacity-100",
+                            )}
+                          >
+                            <img src={thumb} alt={`Secundária ${idx + 1}`} className="h-full w-full object-cover" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-3xl border border-border bg-card p-3 shadow-sm">
@@ -710,6 +779,7 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
                       onPreview={setPreviewTemplate}
                       onDownload={handleExport}
                       exporting={exporting}
+                      recommended={recommendedRizzoId === template.id}
                     />
                   ))}
                 </div>
