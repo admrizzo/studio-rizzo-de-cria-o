@@ -83,7 +83,7 @@ Regras OBRIGATÓRIAS:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.0-flash",
         messages: [
           { role: "system", content: "Responda APENAS com a tool call solicitada. Seja sóbrio e factual. NUNCA use palavras exageradas, clichês imobiliários ou superlativos. Descreva o que se vê nas fotos de forma direta e precisa." },
           { role: "user", content: userContent },
