@@ -379,9 +379,6 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
   useEffect(() => {
     if (selectedPhotoIdx >= photos.length) setSelectedPhotoIdx(0);
     if (secondaryPhotoIdx >= photos.length) setSecondaryPhotoIdx(photos.length > 1 ? 1 : 0);
-    if (secondaryPhotoIdx === selectedPhotoIdx && photos.length > 1) {
-      setSecondaryPhotoIdx((selectedPhotoIdx + 1) % photos.length);
-    }
   }, [photos.length, selectedPhotoIdx, secondaryPhotoIdx]);
 
   useEffect(() => {
