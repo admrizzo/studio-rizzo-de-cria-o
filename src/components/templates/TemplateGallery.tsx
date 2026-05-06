@@ -647,6 +647,41 @@ const TemplateGallery = ({ property, brand, onClose }: TemplateGalleryProps) => 
                     Este imóvel tem uma única foto disponível para as artes.
                   </div>
                 )}
+
+                {photos.length > 1 && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="mb-2 text-xs font-semibold text-foreground">
+                      Foto secundária <span className="font-normal text-muted-foreground">(usada nos templates Rizzo)</span>
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {thumbs.map((thumb, idx) => {
+                        const isPrimary = idx === selectedPhotoIdx;
+                        const isSecondary = idx === secondaryPhotoIdx && !isPrimary;
+                        return (
+                          <button
+                            key={`sec-${thumb}-${idx}`}
+                            type="button"
+                            disabled={isPrimary}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (!isPrimary) setSecondaryPhotoIdx(idx);
+                            }}
+                            className={cn(
+                              "h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 transition-all sm:h-16 sm:w-16",
+                              isSecondary
+                                ? "border-primary shadow-md"
+                                : isPrimary
+                                ? "border-dashed border-muted opacity-30 cursor-not-allowed"
+                                : "border-border opacity-70 hover:opacity-100",
+                            )}
+                          >
+                            <img src={thumb} alt={`Secundária ${idx + 1}`} className="h-full w-full object-cover" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-3xl border border-border bg-card p-3 shadow-sm">
