@@ -265,6 +265,7 @@ const TemplateThumb = ({
   onPreview,
   onDownload,
   exporting,
+  recommended,
 }: {
   template: TemplateConfig;
   templateProps: TemplateProps;
@@ -272,14 +273,23 @@ const TemplateThumb = ({
   onPreview: (t: TemplateConfig) => void;
   onDownload: (t: TemplateConfig) => void;
   exporting: boolean;
+  recommended?: boolean;
 }) => {
   const isStories = nativeH === STORY_HEIGHT;
 
   return (
     <div
-      className="w-full rounded-2xl border border-border bg-card p-2 text-left shadow-sm"
+      className={cn(
+        "relative w-full rounded-2xl border bg-card p-2 text-left shadow-sm",
+        recommended ? "border-primary ring-2 ring-primary/30" : "border-border",
+      )}
       onClick={(event) => event.stopPropagation()}
     >
+      {recommended && (
+        <span className="absolute -top-2 left-3 z-10 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow">
+          Recomendado
+        </span>
+      )}
       <ScaledCanvas
         Component={template.component}
         props={templateProps}
