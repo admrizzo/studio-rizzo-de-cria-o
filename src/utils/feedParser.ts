@@ -112,9 +112,15 @@ export function parseCRMFeed(feed: any): ParsedFeed {
 
     if (allFull.length === 0) continue;
 
-    const area = unit.areas?.area_privativa || unit.areas?.area_total || unit.area_privativa || unit.area_total || 0;
-    const vVenda = getNum(unit.valor_venda);
-    const vLocacao = getNum(unit.valor_locacao);
+    const area = getNum(unit.areas?.privativa) || getNum(unit.areas?.total) || getNum(unit.areas?.area_privativa) || getNum(unit.areas?.area_total) || getNum(unit.area_privativa) || getNum(unit.area_total) || 0;
+    const vVenda = parsePrice(unit.valor_venda);
+    const vLocacao = parsePrice(unit.valor_locacao);
+    const precoPrincipal = vVenda ?? vLocacao ?? 0;
+    const tipoNeg = unit.tipo_negociacao
+      || (vVenda && vLocacao ? "Venda,Locação" : vVenda ? "Venda" : vLocacao ? "Locação" : "");
+    if (precoPrincipal === 0) {
+      console.warn(`[feedParser] Imóvel ${unit.id} sem preço:`, { vV: unit.valor_venda, vL: unit.valor_locacao });
+    }
     const endStr = endereco ? [endereco.logradouro, endereco.numero].filter(Boolean).join(", ") : "";
 
     const titulo = unit.titulo ||
@@ -125,7 +131,7 @@ export function parseCRMFeed(feed: any): ParsedFeed {
       id: `u-${unit.id}`,
       titulo,
       tipo: unit.tipo || "Imóvel",
-      preco: vVenda || vLocacao || 0,
+      preco: precoPrincipal,
       endereco: endStr,
       bairro: endereco?.bairro || "",
       cidade: endereco?.cidade || "",
@@ -139,8 +145,9 @@ export function parseCRMFeed(feed: any): ParsedFeed {
       fotosSmall: allSmall,
       destaque: unit.exibicao === "destaque",
       suites: getNum(unit.suites),
-      valorVenda: vVenda,
-      valorLocacao: vLocacao,
+      valorVenda: vVenda ?? 0,
+      valorLocacao: vLocacao ?? 0,
+      tipoNegociacao: tipoNeg,
       situacao: unit.situacao || "",
       condominio: condoName,
       destinacao: unit.destinacao || "",
