@@ -49,7 +49,7 @@ const PropertyCard = ({ property, index, selectionMode, isSelected, onToggleSele
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         <div className="absolute bottom-3 left-3 right-3">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground">
+            <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-primary text-primary-foreground">
               {property.tipo}
             </span>
             <span className="text-[10px] font-mono text-white/50 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full">
@@ -61,7 +61,7 @@ const PropertyCard = ({ property, index, selectionMode, isSelected, onToggleSele
           )}
         </div>
         {property.destaque && (
-          <div className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground">
+          <div className="absolute top-3 left-3 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500 text-white">
             ★ Destaque
           </div>
         )}

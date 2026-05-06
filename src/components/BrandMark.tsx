@@ -33,10 +33,10 @@ const BrandMark: React.FC<BrandMarkProps> = ({
       </span>
       {showText && (
         <span
-          className={`font-bold tracking-tight uppercase ${s.text} ${colorClass}`}
-          style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 800 }}
+          className={`font-bold tracking-tight ${s.text} ${colorClass}`}
+          style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
         >
-          Studio de Criação
+          Studio
         </span>
       )}
     </div>

@@ -119,24 +119,24 @@ const Index = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px]"
               onClick={() => setMenuOpen(false)}
             />
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 left-0 bottom-0 z-50 w-72 bg-card border-r border-border shadow-xl flex flex-col"
+              transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
+              className="fixed top-0 left-0 bottom-0 z-50 w-64 bg-sidebar border-r border-sidebar-border shadow-2xl flex flex-col"
             >
-              <div className="flex items-center justify-between p-5 border-b border-border">
-                <BrandMark size="sm" />
-                <Button variant="ghost" size="icon" onClick={() => setMenuOpen(false)} className="rounded-full">
+              <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+                <BrandMark size="sm" variant="dark" />
+                <Button variant="ghost" size="icon" onClick={() => setMenuOpen(false)} className="rounded-md text-sidebar-foreground hover:bg-sidebar-accent">
                   <X className="w-5 h-5" />
                 </Button>
               </div>
 
-              <nav className="flex-1 p-3 space-y-1">
+              <nav className="flex-1 p-2 space-y-1">
                 {[
                   ...NAV_ITEMS,
                   ...(isAdmin
@@ -148,36 +148,32 @@ const Index = () => {
                     <button
                       key={item.key}
                       onClick={() => navigateTo(item.key)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                          ? "bg-sidebar-accent text-sidebar-primary"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                       }`}
                     >
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-4 h-4" />
                       {item.label}
-                      {isActive && <ChevronRight className="w-4 h-4 ml-auto opacity-50" />}
                     </button>
                   );
                 })}
               </nav>
 
-              <div className="p-4 border-t border-border space-y-3">
+              <div className="p-4 border-t border-sidebar-border space-y-3">
                 {user && (
-                  <div className="flex items-center gap-2">
-                    {profile?.foto_url && <img src={profile.foto_url} alt="" className="w-8 h-8 rounded-full object-cover border border-primary/20" />}
+                  <div className="flex items-center gap-3">
+                    {profile?.foto_url && <img src={profile.foto_url} alt="" className="w-8 h-8 rounded-full object-cover border border-sidebar-border" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground font-medium truncate">{profile?.nome || user.email}</p>
-                      {profile?.creci && <p className="text-[9px] text-muted-foreground">CRECI {profile.creci}</p>}
+                      <p className="text-[11px] text-sidebar-foreground font-semibold truncate">{profile?.nome || user.email}</p>
+                      <p className="text-[10px] text-sidebar-foreground/50">Módulo Studio</p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={signOut} className="shrink-0 text-muted-foreground hover:text-destructive">
-                      <LogOut className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" onClick={signOut} className="shrink-0 text-sidebar-foreground/50 hover:text-destructive h-8 w-8">
+                      <LogOut className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 )}
-                <p className="text-[10px] text-muted-foreground text-center opacity-60">
-                  Conteúdo imobiliário em escala
-                </p>
               </div>
             </motion.div>
           </>
@@ -207,8 +203,8 @@ const Index = () => {
               className="text-center space-y-6 max-w-xl"
             >
               <div className="flex justify-center"><BrandMark size="xl" /></div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight uppercase" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                STUDIOS DE CRIAÇÃO
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                STUDIO
               </h1>
               <p className="text-muted-foreground text-lg leading-relaxed">
                 Crie <span className="text-foreground font-semibold">vídeos</span>, <span className="text-foreground font-semibold">artes</span> e <span className="text-foreground font-semibold">legendas</span> profissionais para seus imóveis
@@ -242,12 +238,12 @@ const Index = () => {
             {isMainView && (
               <>
                 {/* Hero banner above grid */}
-                <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-sm">
+                <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-border rounded-lg p-5 sm:p-6 shadow-sm">
                   <div className="flex items-center gap-4">
                     <BrandMark size="lg" showText={false} />
                     <div>
-                      <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight uppercase" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                        STUDIOS DE CRIAÇÃO
+                      <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        STUDIO
                       </h1>
                       <p className="text-muted-foreground text-sm mt-0.5">
                         Vídeos, artes e legendas profissionais para seus imóveis
