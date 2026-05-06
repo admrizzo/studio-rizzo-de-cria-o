@@ -127,11 +127,9 @@ const PropertyDetailModal = ({ property, onClose }: PropertyDetailModalProps) =>
               </span>
             </p>
             <div className="flex items-center gap-3 flex-wrap">
-              {property.preco > 0 && (
-                <span className="text-lg font-black text-secondary tracking-tight">
-                  {formatPrice(property.preco)}
-                </span>
-              )}
+              <span className="text-lg font-black text-secondary tracking-tight">
+                {property.preco > 0 ? formatPrice(property.preco) : "Sob consulta"}
+              </span>
               <div className="flex gap-1.5 text-xs text-muted-foreground flex-wrap">
                 {stats.map((stat) => (
                   <span key={stat.label} className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-md">
