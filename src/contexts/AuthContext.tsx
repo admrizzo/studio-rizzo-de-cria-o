@@ -6,8 +6,11 @@ export interface AgentProfile {
   id: string;
   email: string;
   nome: string;
-  role: string;
+  role: "super_admin" | "admin" | "corretor";
   foto_url: string;
+  telefone: string;
+  whatsapp: string;
+  creci: string;
 }
 
 interface AuthState {
