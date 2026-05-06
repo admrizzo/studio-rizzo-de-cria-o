@@ -4,11 +4,13 @@ import { User } from "@supabase/supabase-js";
 
 export interface AgentProfile {
   id: string;
+  email: string;
   nome: string;
+  role: "super_admin" | "admin" | "corretor";
+  foto_url: string;
   telefone: string;
   whatsapp: string;
   creci: string;
-  foto_url: string;
 }
 
 interface AuthState {
@@ -37,24 +39,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
+  const fetchUserData = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("studio_profiles")
       .select("*")
       .eq("id", userId)
-      .single();
-    if (data) {
-      setProfile(data as AgentProfile);
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Error fetching studio profile:", error);
+      return;
     }
-  };
 
-  const fetchRoles = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const roles = (data || []).map((r: any) => r.role);
-    setIsAdmin(roles.includes("admin") || roles.includes("super_admin"));
+    if (data) {
+      setProfile(data as unknown as AgentProfile);
+      setIsAdmin(data.role === "admin" || data.role === "super_admin");
+    }
   };
 
   useEffect(() => {
@@ -63,8 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           setTimeout(() => {
-            fetchProfile(session.user.id);
-            fetchRoles(session.user.id);
+            fetchUserData(session.user.id);
           }, 0);
         } else {
           setProfile(null);
@@ -77,8 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
-        fetchRoles(session.user.id);
+        fetchUserData(session.user.id);
       }
       setLoading(false);
     });
@@ -113,8 +111,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (data: Partial<AgentProfile>) => {
     if (!user) return { error: "Não autenticado" };
     const { error } = await supabase
-      .from("profiles")
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .from("studio_profiles")
+      .update({ ...data, updated_at: new Date().toISOString() } as any)
       .eq("id", user.id);
     if (!error) {
       setProfile(prev => prev ? { ...prev, ...data } : null);

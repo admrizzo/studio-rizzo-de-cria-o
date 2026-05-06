@@ -1,0 +1,4 @@
+ALTER TABLE public.studio_profiles 
+ADD COLUMN IF NOT EXISTS telefone TEXT,
+ADD COLUMN IF NOT EXISTS whatsapp TEXT,
+ADD COLUMN IF NOT EXISTS creci TEXT;
