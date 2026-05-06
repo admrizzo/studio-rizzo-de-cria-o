@@ -6,6 +6,8 @@ export interface TemplateProps {
   brand: BrandConfig;
   agent?: AgentProfile | null;
   photoUrl: string;
+  /** Optional secondary photo. Templates that support it will use it; others ignore. */
+  secondaryPhotoUrl?: string;
 }
 
 export interface TemplateConfig {
