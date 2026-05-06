@@ -92,16 +92,11 @@
   }
 
   .card-cinema {
-    background: hsl(0 0% 100%);
-    border: 1px solid hsl(150 10% 88%);
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.04);
+    @apply bg-card border border-border shadow-sm transition-all duration-200;
   }
 
   .card-cinema:hover {
-    border-color: hsl(152 65% 32% / 0.3);
-    box-shadow: 0 8px 30px hsl(0 0% 0% / 0.08);
-    transform: translateY(-2px);
+    @apply border-primary/30 shadow-md translate-y-[-1px];
   }
 
   .hero-glow {
