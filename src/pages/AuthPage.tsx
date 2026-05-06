@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +10,20 @@ import { LogIn, Mail, Lock, ArrowRight, Loader2, Film, ImageIcon, Wand2 } from "
 import BrandMark from "@/components/BrandMark";
 
 const AuthPage = () => {
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [conceptIndex, setConceptIndex] = useState(0);
 
   const concepts = ["Conteúdo", "Movimento", "Luz", "História", "Imagem", "Direção"];
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const id = setInterval(
@@ -29,17 +37,25 @@ const AuthPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      toast.error(
-        error.toLowerCase().includes("invalid")
-          ? "E-mail ou senha incorretos"
-          : error,
-      );
-    } else {
-      toast.success("Bem-vindo ao Studio");
+    
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.toLowerCase().includes("invalid")) {
+          toast.error("E-mail ou senha incorretos");
+        } else if (error.toLowerCase().includes("connection")) {
+          toast.error("Erro de conexão com o servidor");
+        } else {
+          toast.error(error);
+        }
+      } else {
+        toast.success("Bem-vindo ao Studio");
+      }
+    } catch (err: any) {
+      toast.error("Ocorreu um erro inesperado na autenticação");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const STUDIO_GREEN = "#39FF14";
