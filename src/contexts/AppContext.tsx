@@ -226,6 +226,7 @@ export const AppProvider = ({ children, demo = false }: { children: ReactNode; d
         return cache;
       }
     } catch (err) {
+      toast.error("Erro ao carregar feed. Verifique a URL nas configurações.");
       console.error("Failed to fetch feed from API:", err);
     }
     return null;
