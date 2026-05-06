@@ -20,6 +20,12 @@ const AuthPage = () => {
   const concepts = ["Conteúdo", "Movimento", "Luz", "História", "Imagem", "Direção"];
 
   useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
     const id = setInterval(
       () => setConceptIndex((i) => (i + 1) % concepts.length),
       2200,
@@ -31,17 +37,25 @@ const AuthPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (error) {
-      toast.error(
-        error.toLowerCase().includes("invalid")
-          ? "E-mail ou senha incorretos"
-          : error,
-      );
-    } else {
-      toast.success("Bem-vindo ao Studio");
+    
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.toLowerCase().includes("invalid")) {
+          toast.error("E-mail ou senha incorretos");
+        } else if (error.toLowerCase().includes("connection")) {
+          toast.error("Erro de conexão com o servidor");
+        } else {
+          toast.error(error);
+        }
+      } else {
+        toast.success("Bem-vindo ao Studio");
+      }
+    } catch (err: any) {
+      toast.error("Ocorreu um erro inesperado na autenticação");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const STUDIO_GREEN = "#39FF14";
