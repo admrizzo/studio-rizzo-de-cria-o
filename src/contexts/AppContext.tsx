@@ -71,7 +71,7 @@ const loadBrandFromStorage = (): BrandConfig => {
   return defaultBrand;
 };
 
-const CACHE_KEY = "sgflix-feed-cache";
+const CACHE_KEY = "sgflix-feed-cache-v2";
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 interface FeedCache {
