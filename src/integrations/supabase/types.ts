@@ -181,30 +181,39 @@ export type Database = {
       studio_profiles: {
         Row: {
           created_at: string
+          creci: string | null
           email: string
           foto_url: string | null
           id: string
           nome: string | null
           role: Database["public"]["Enums"]["app_role"] | null
+          telefone: string | null
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
           created_at?: string
+          creci?: string | null
           email: string
           foto_url?: string | null
           id: string
           nome?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
+          telefone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
           created_at?: string
+          creci?: string | null
           email?: string
           foto_url?: string | null
           id?: string
           nome?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
+          telefone?: string | null
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
